@@ -101,7 +101,7 @@ class TabsView extends Component {
 function hideTabs (component){
     const navTabs = document.getElementsByClassName('nav-tabs')[0];
     const tabElement = navTabs.childNodes[0];
-    const doubleHeight = (tabElement.offsetHeight*2) - 3; // bootstrap margin
+    const doubleHeight = tabElement ? (tabElement.offsetHeight*2) - 3 : 80; // bootstrap margin
     if(navTabs.clientHeight > doubleHeight) { // check if tabs goes in two rows...
         const hiddenTabs = component.state.hiddenTabs;
         const showedTabs = component.state.showedTabs.slice(0, -1);
