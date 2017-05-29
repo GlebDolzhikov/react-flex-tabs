@@ -45,6 +45,7 @@ class TabsView extends Component {
                         <MenuItem
                             onClick={() => setCurrentTab(tab.id)}
                             eventKey={index}
+                            active={tab.id == currentTab}
                             key={index}>
                             {tab.name}
                         </MenuItem>
@@ -99,7 +100,9 @@ class TabsView extends Component {
 
 function hideTabs (component){
     const navTabs = document.getElementsByClassName('nav-tabs')[0];
-    if(navTabs.clientHeight > 70) {
+    const tabElement = navTabs.childNodes[0];
+    const doubleHeight = (tabElement.offsetHeight*2) - 3; // bootstrap margin
+    if(navTabs.clientHeight > doubleHeight) { // check if tabs goes in two rows...
         const hiddenTabs = component.state.hiddenTabs;
         const showedTabs = component.state.showedTabs.slice(0, -1);
         hiddenTabs.push(component.state.showedTabs[component.state.showedTabs.length - 1]);
