@@ -27,4 +27,5 @@ Here is a sample integration:
 ```
 
 ## Development
-* Development server `npm start`.
+* Run development server `npm run start`
+* Run 'npm run prepublish' before final push
