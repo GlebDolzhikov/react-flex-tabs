@@ -5,10 +5,13 @@ import {Nav, NavItem, NavDropdown, MenuItem} from "react-bootstrap";
 const propTypes = {
     setCurrentTab: PropTypes.func,
     tabsArray: PropTypes.array,
-    currentTab: PropTypes.number
+    currentTab: PropTypes.number,
+    buttonText: PropTypes.string
 };
 
-const defaultProps = {};
+const defaultProps = {
+    buttonText: 'More'
+};
 
 class TabsView extends Component {
     constructor (props) {
@@ -40,7 +43,7 @@ class TabsView extends Component {
                 ))}
 
                 {this.state.hiddenTabs.length > 0 &&
-                <NavDropdown id='nav-dropdown' title="More" key={1} pullRight={true}>
+                <NavDropdown id='nav-dropdown' title={this.props.buttonText} key={1} pullRight={true}>
                     {this.state.hiddenTabs.map((tab, index) => (
                         <MenuItem
                             onClick={() => setCurrentTab(tab.id)}
@@ -105,7 +108,7 @@ function hideTabs (component){
     if(navTabs.clientHeight > doubleHeight) { // check if tabs goes in two rows...
         const hiddenTabs = component.state.hiddenTabs;
         const showedTabs = component.state.showedTabs.slice(0, -1);
-        hiddenTabs.push(component.state.showedTabs[component.state.showedTabs.length - 1]);
+        hiddenTabs.unshift(component.state.showedTabs[component.state.showedTabs.length - 1]);
         component.setState({showedTabs, hiddenTabs})
     }
 }
