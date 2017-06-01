@@ -18,9 +18,29 @@ class TabsView extends Component {
         super(props);
         this.state = {
             showedTabs: [],
-            hiddenTabs: []
+            hiddenTabs: [],
+            currentTab: 1
         };
     }
+
+    handlingTabKey = (e) => {
+        if (e.keyCode === 9) {
+            e.preventDefault();
+            const {tabsArray} = this.props;
+            const setCurrentTab = this.props.setCurrentTab || this.setCurrentTab;
+            const currentTab = this.props.currentTab || this.state.currentTab;
+
+            let currentIndex = 0;
+            tabsArray.forEach((tab, index) => {
+                if (tab.id === currentTab) {
+                    currentIndex = index;
+                }
+            });
+
+            const nextTabId = getNextTabId(currentIndex, tabsArray);
+            setCurrentTab(nextTabId)
+        }
+    };
 
     setCurrentTab = (tabId)=>{
         this.setState({currentTab: tabId})
@@ -33,7 +53,10 @@ class TabsView extends Component {
         return (
             <Nav bsStyle="tabs" activeKey="1">
                 {this.state.showedTabs.map((tab, index) => (
-                    <NavItem onClick={() => setCurrentTab(tab.id)}
+                    <NavItem onClick={(e) => {
+                                e.currentTarget.blur();
+                                setCurrentTab(tab.id)
+                             }}
                              key={index}
                              active={tab.id == currentTab}
                              eventKey={index}
@@ -78,7 +101,8 @@ class TabsView extends Component {
         }
     }
 
-    componentWillMount(nextProps){
+    componentWillMount(){
+        document.addEventListener("keydown", this.handlingTabKey, false);
         this.setState({
             showedTabs: this.props.tabsArray,
             hiddenTabs: []
@@ -98,6 +122,7 @@ class TabsView extends Component {
 
     componentWillUnmount() {
         window.removeEventListener("resize", this.fireRerender);
+        document.removeEventListener("keydown", this.handlingTabKey, false);
     }
 }
 
@@ -112,6 +137,13 @@ function hideTabs (component){
         component.setState({showedTabs, hiddenTabs})
     }
 }
+
+function getNextTabId(i, arr) {
+    i = i + 1;
+    i = i % arr.length;
+    return arr[i].id;
+}
+
 
 TabsView.propTypes = propTypes;
 TabsView.defaultProps = defaultProps;
