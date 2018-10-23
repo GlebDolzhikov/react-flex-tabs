@@ -1,17 +1,17 @@
 {
   "name": "react-flex-tabs",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "react flex tabs",
-  "author": "Kinosura",
+  "author": "Gleb Dolzhikov",
   "license": "MIT",
   "homepage": "http://kinosura.kiev.ua/example/",
   "keywords": [
     "react-component",
     "react"
   ],
-  "repository" :
-  { "type" : "git",
-    "url" : "https://github.com/GlebDolzhikov/react-flex-tabs.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GlebDolzhikov/react-flex-tabs.git"
   },
   "options": {
     "mocha": "--require scripts/mocha_runner src/**/__tests__/**/*.js"
@@ -29,7 +29,7 @@
     "babel-cli": "^6.6.4",
     "babel-core": "^6.7.4",
     "babel-eslint": "^6.0.2",
-    "babel-loader": "^7.0.0",
+    "babel-loader": "^6.1.1",
     "babel-plugin-transform-es2015-modules-umd": "^6.6.5",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.7.4",
@@ -59,6 +59,7 @@
   "dependencies": {
     "babel-runtime": "^6.23.0",
     "prop-types": "^15.5.2",
-    "react-bootstrap": "^0.31.0"
+    "react-bootstrap": "^0.32.4",
+    "react-measure": "^2.1.2"
   }
 }

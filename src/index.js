@@ -1,151 +1,112 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {Nav, NavItem, NavDropdown, MenuItem} from "react-bootstrap";
+import {Nav, NavItem} from "react-bootstrap";
+import {withContentRect} from 'react-measure';
+
+import {getTextWidth} from './utils';
+import MoreButton from './MoreButton'
 
 const propTypes = {
-    setCurrentTab: PropTypes.func,
-    tabsArray: PropTypes.array,
-    currentTab: PropTypes.number,
-    buttonText: PropTypes.string
+	setCurrentTab: PropTypes.func,
+	tabsArray: PropTypes.array,
+	currentTab: PropTypes.number,
+	buttonText: PropTypes.string
 };
 
 const defaultProps = {
-    buttonText: 'More'
+	buttonText: 'More',
+	font: '14px Helvetica Neue',
+	margins: 40
 };
 
 class TabsView extends Component {
-    constructor (props) {
-        super(props);
-        this.state = {
-            showedTabs: [],
-            hiddenTabs: [],
-            currentTab: 1
-        };
-    }
+	state = {
+		showedTabs: [],
+		hiddenTabs: [],
+		currentTab: 1
+	};
 
-    handlingTabKey = (e) => {
-        if (e.keyCode === 9) {
-            e.preventDefault();
-            const {tabsArray} = this.props;
-            const setCurrentTab = this.props.setCurrentTab || this.setCurrentTab;
-            const currentTab = this.props.currentTab || this.state.currentTab;
+	render() {
+		const {currentTab, measureRef, buttonText, setCurrentTab} = this.props;
+		const {showedTabs, hiddenTabs} = this.state;
 
-            let currentIndex = 0;
-            tabsArray.forEach((tab, index) => {
-                if (tab.id === currentTab) {
-                    currentIndex = index;
-                }
-            });
+		return (
+			<div ref={measureRef} style={{flex: 1}}>
+				<Nav bsStyle="tabs" activeKey="1">
+					{showedTabs.map(({id, name}) => (
+						<NavItem onClick={(e) => {
+							e.currentTarget.blur();
+							this.setCurrentTab(id)
+						}}
+								 key={id}
+								 active={id === currentTab}
+								 eventKey={id}
+								 href="#">
+							{name}
+						</NavItem>
+					))}
 
-            const nextTabId = getNextTabId(currentIndex, tabsArray);
-            setCurrentTab(nextTabId)
-        }
-    };
+					<MoreButton
+						hiddenTabs={hiddenTabs}
+						buttonText={buttonText}
+						setCurrentTab={setCurrentTab}
+						currentTab={currentTab}
+					/>
+				</Nav>
+			</div>
+		);
+	}
 
-    setCurrentTab = (tabId)=>{
-        this.setState({currentTab: tabId})
-    };
+	componentDidMount() {
+		this.hideTabs();
+	}
 
-    render() {
-        const setCurrentTab = this.props.setCurrentTab || this.setCurrentTab;
-        const currentTab = this.props.currentTab || this.state.currentTab;
+	componentDidUpdate(prevProps) {
+		if (
+			prevProps.contentRect.bounds.width !== this.props.contentRect.bounds.width ||
+			prevProps.tabsArray.length !== this.props.tabsArray.length
+		) {
+			this.hideTabs();
+		}
+	}
 
-        return (
-            <Nav bsStyle="tabs" activeKey="1">
-                {this.state.showedTabs.map((tab, index) => (
-                    <NavItem onClick={(e) => {
-                                e.currentTarget.blur();
-                                setCurrentTab(tab.id)
-                             }}
-                             key={index}
-                             active={tab.id == currentTab}
-                             eventKey={index}
-                             href="#">
-                        {tab.name}
-                    </NavItem>
-                ))}
+	hideTabs = () => {
+		const {
+			contentRect: {bounds},
+			tabsArray,
+			font,
+			buttonText,
+			margins
+		} = this.props;
+		const hiddenTabs = [];
 
-                {this.state.hiddenTabs.length > 0 &&
-                <NavDropdown id='nav-dropdown' title={this.props.buttonText} key={1} pullRight={true}>
-                    {this.state.hiddenTabs.map((tab, index) => (
-                        <MenuItem
-                            onClick={() => setCurrentTab(tab.id)}
-                            eventKey={index}
-                            active={tab.id == currentTab}
-                            key={index}>
-                            {tab.name}
-                        </MenuItem>
-                    ))}
-                </NavDropdown>
-                }
-            </Nav>
-        );
-    }
+		const moreButtonWidth = getTextWidth(buttonText, font) + margins;
+		let tabsWidth = 0 + moreButtonWidth;
 
-    componentDidUpdate(prevProps, prevState) {
-        if(prevState.rerenderMe !== this.state.rerenderMe){ // refresh tabs in state from props in case of if width of screen became bigger
-            this.setState({
-                showedTabs: this.props.tabsArray,
-                hiddenTabs: []
-            })
-        }
-        hideTabs(this);
-    }
+		const showedTabs = tabsArray.filter(tab => {
+			tabsWidth = tabsWidth + getTextWidth(tab.name, font) + margins;
+			const tabFits = tabsWidth < bounds.width;
+			if (!tabFits) {
+				hiddenTabs.push(tab);
+			}
+			return tabFits;
+		});
 
-    componentWillReceiveProps(nextProps){
-        if(this.props.tabsArray && this.props.tabsArray.length < nextProps.tabsArray.length){
-            this.setState({
-                showedTabs: nextProps.tabsArray,
-                hiddenTabs: []
-            })
-        }
-    }
+		this.setState({
+			showedTabs,
+			hiddenTabs
+		});
+	};
 
-    componentWillMount(){
-        document.addEventListener("keydown", this.handlingTabKey, false);
-        this.setState({
-            showedTabs: this.props.tabsArray,
-            hiddenTabs: []
-        })
-    }
+	setCurrentTab = (tabId) => {
+		this.setState({currentTab: tabId})
+	};
 
-    fireRerender = () => {
-        this.setState({
-            rerenderMe: Date.now()
-        });
-    };
-
-    componentDidMount() {
-        hideTabs(this);
-        window.addEventListener("resize", this.fireRerender);
-    }
-
-    componentWillUnmount() {
-        window.removeEventListener("resize", this.fireRerender);
-        document.removeEventListener("keydown", this.handlingTabKey, false);
-    }
-}
-
-function hideTabs (component){
-    const navTabs = document.getElementsByClassName('nav-tabs')[0];
-    const tabElement = navTabs.childNodes[0];
-    const doubleHeight = tabElement ? (tabElement.offsetHeight*2) - 3 : 80; // bootstrap margin
-    if(navTabs.clientHeight > doubleHeight) { // check if tabs goes in two rows...
-        const hiddenTabs = component.state.hiddenTabs;
-        const showedTabs = component.state.showedTabs.slice(0, -1);
-        hiddenTabs.unshift(component.state.showedTabs[component.state.showedTabs.length - 1]);
-        component.setState({showedTabs, hiddenTabs})
-    }
-}
-
-function getNextTabId(i, arr) {
-    i = i + 1;
-    i = i % arr.length;
-    return arr[i].id;
 }
 
 
 TabsView.propTypes = propTypes;
 TabsView.defaultProps = defaultProps;
 
-export default TabsView;
+
+export default withContentRect('bounds')(TabsView);
